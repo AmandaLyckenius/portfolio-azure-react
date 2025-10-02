@@ -1,46 +1,109 @@
-# Getting Started with Create React App
+# React‑portfolio på Azure Static Web Apps
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+> Min personliga portfolio byggd i React, och hostad på **Azure Static Web Apps** med automatisk deploy tack vare **GitHub Actions**.
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## Live‑demo
 
-### `npm start`
+[https://thankful-mud-053b1e703.2.azurestaticapps.net/](https://thankful-mud-053b1e703.2.azurestaticapps.net/)
+---
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Vad gör den här portfolion bra?
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+* Snabb och överskådlig presentation av mina tekniska färdigheter och min akademiska bakgrund.
+* Länkar till min GitHub och LinkedIn
+* Hostad på Azure för stabil och kostnadseffektiv drift med CI/CD från GitHub.
 
-### `npm test`
+---
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Screenshots
 
-### `npm run build`
+**Startsida**  
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+![Startsida](docs/screenshots/Portfolio-SWA.png)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+**Deploy-pipeline (GitHub Actions)**  
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+![GitHub Actions](docs/screenshots/GitHub-actions.png)
 
-### `npm run eject`
+**Azure SWA översikt**  
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+![Azure SWA](docs/screenshots/Finished-SWA.png)
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+---
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+## Tech‑stack
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+* **React** (Create React App)
+* **TypeScript**
+* **Styling:** CSS Modules
+* **CI/CD:** GitHub Actions (Azure Static Web Apps)
+* **Hosting:** Azure Static Web Apps
 
-## Learn More
+---
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Kom igång lokalt
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+```bash
+# Klona
+git clone https://github.com/AmandaLyckenius/portfolio-azure-react.git
+cd portfolio-azure-react
+
+# Installera
+npm install
+
+# Starta lokalt
+npm start
+
+# Bygg för produktion
+npm run build 
+```
+---
+
+## Deploy till Azure Static Web Apps
+
+### 1) Skapa SWA från GitHub‑repo
+
+![Create Resource](docs/screenshots/Create-resource-SWA.png)
+* I Azure Portal: **Create resource → Static Web App**
+![Välj Github + branch](docs/screenshots/Create-resource-SWA-3.png)
+* Välj GitHub‑repo och branch (ofta `main`).
+* **Build presets:** Välj *React*
+* **App location:** `/` (roten, om din `package.json` ligger där)
+* **Build output location:**
+  * CRA: `build`
+
+Detta skapar automatiskt en **GitHub Actions**‑workflow i `.github/workflows/`.
+
+### 2) GitHub Actions (exempel på workflow)
+
+> Filen skapas av Azure, men ungefär så här kan den se ut. 
+```yaml
+name: Azure Static Web Apps CI/CD
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    branches: [ main ]
+jobs:
+  build_and_deploy_job:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    runs-on: ubuntu-latest
+    name: Build and Deploy Job
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build And Deploy
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: 'upload'
+          app_location: '/'              
+          output_location: 'build'        
+```
+
+## Deployflöde 
+
+1. **Push till main** → 2. **GitHub Actions bygger** → 3. **Artefakt laddas upp till SWA** → 4. **Sajten uppdateras**
